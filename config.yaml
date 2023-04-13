@@ -1,0 +1,9 @@
+---
+sites:
+  - "afreecatv.com"
+  - "gall.dcinside.com"
+system: "windows"
+hosts_path:
+  wsl: "/etc/hosts"
+  windows: "/mnt/c/Windows/System32/drivers/etc/hosts"
+ip_local: "127.0.0.1"
