@@ -3,12 +3,11 @@ import time
 from datetime import datetime
 import yaml
 
-with open("config.yaml") as f:
+with open("/home/xyzsyz/project/website-blocker/config.yaml") as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
 
 
 # TODO: Create GUI using tkinter
-# time.sleep(1)
 
 # TODO: Specify the start time and end time
 # TODO: User defined input
@@ -20,18 +19,81 @@ with open("config.yaml") as f:
 # From config.yaml
 sites_to_block = config["sites"]
 system = config["system"]
-hosts_path = config["hosts_path"][system]
+hostsfile_path = config["hosts_path"][system]
 redirect = config["ip_local"]
 
+import sys
+import os
+import time
+import webbrowser
+import urllib
+from threading import Timer
 
-# TODO: Rethink about the process
+
+class Blocker:
+    def __init__(self):
+        # if sys.platform.startswith("win"):
+        #     self.hostsfile_path = "/mnt/c/Windows/System32/drivers/etc/hosts"
+        self.hostsfile_path = "/mnt/c/Windows/System32/drivers/etc/hosts"
+
+    def block(self):
+        hostsfile = open(self.hostsfile_path, "a+")
+        # hostsfile = open(self.hostsfile_path, 'a')
+        # Add commentary notes
+        #
+        hostsfile.write("\n")
+        hostsfile.write("# Start of domain blocklist\n")
+        for site in sites_to_block:
+            hostsfile.write(redirect + "\t\t\t" + site + "\n")
+        hostsfile.write("# End of domain blocklist")
+        hostsfile.close()
+
+        self.blockTime = int(input())
+        t = Timer(self.blockTime, self.unblock)
+        t.start()
+
+        print("Domains Blocked!")
+
+    def unblock(self):
+        originalFile = []
+        ignore = False
+
+        hostsfile_modified = open(self.hostsfile_path, "r+")
+        for line in hostsfile_modified:
+            if line == "# Start of domain blocklist\n":
+                ignore = True
+            if ignore == False:
+                originalFile.append(line)
+            elif line == "# End of domain blocklist":
+                ignore = False
+        hostsfile_modified.close()
+
+        while originalFile[-1] == "\n":
+            originalFile.pop()
+
+        # print(originalFile)
+
+        hostsfile_restored = open(self.hostsfile_path, "w")
+        for line in originalFile:
+            hostsfile_restored.write(line)
+        hostsfile_restored.close()
+
+        print("Domains Unblocked!")
 
 
-# TODO: Improve the algorithm and logic
-# TODO: Create a class object
+if __name__ == "__main__":
+    blocker = Blocker()
+    blocker.block()
+
+# TODO: Finish the block / unblock logic
+# TODO: Tests
+# TODO: CLI execution
+# TODO: GUI
+
+"""
 def main():
     while True:
-        cmd = input("Block/Unblock: ").lower()
+        cmd = input("block/unblock: ").lower()
         if cmd == "block":
             date_entry = input("YYYY-MM-DD-HH: ")
             year, month, day, hour = map(int, date_entry.split("-"))
@@ -69,3 +131,4 @@ def unblock_sites():
 
 if __name__ == "__main__":
     main()
+"""
